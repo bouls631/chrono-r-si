@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Chrono RESI 💪</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a2e;
+            color: #ffffff;
+            overflow-x: hidden;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        /* Écran de sélection */
+        #selection-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        #selection-screen h1 {
+            color: #06ffa5;
+            font-size: clamp(24px, 5vw, 36px);
+            margin-bottom: 40px;
+            line-height: 1.4;
+        }
+
+        #selection-screen h2 {
+            font-size: clamp(16px, 3vw, 20px);
+            margin-bottom: 30px;
+            color: #ffffff;
+        }
+
+        .btn-large {
+            width: 100%;
+            max-width: 400px;
+            padding: 25px;
+            margin: 15px auto;
+            font-size: clamp(18px, 4vw, 22px);
+            font-weight: bold;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: block;
+        }
+
+        .btn-large:active {
+            transform: scale(0.95);
+        }
+
+        .btn-echauffement {
+            background: #06ffa5;
+            color: #1a1a2e;
+        }
+
+        .btn-entrainement {
+            background: #e94560;
+            color: #ffffff;
+        }
+
+        .btn-entrainement:disabled {
+            background: #0f3460;
+            color: #666;
+            cursor: not-allowed;
+        }
+
+        .warning-text {
+            color: #a0a0a0;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+
+        /* Écran d'entraînement */
+        #training-screen {
+            display: none;
+        }
+
+        .card {
+            background: #16213e;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .header-card {
+            text-align: center;
+        }
+
+        .mode-label {
+            font-size: 18px;
+            font-weight: bold;
+            color: #06ffa5;
+            margin-bottom: 5px;
+        }
+
+        .progress-label {
+            font-size: 14px;
+            color: #a0a0a0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #0f3460;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #e94560;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .phase-card {
+            text-align: center;
+            padding: 30px 15px;
+        }
+
+        .phase-text {
+            font-size: clamp(24px, 6vw, 36px);
+            font-weight: bold;
+            margin-bottom: 20px;
+            line-height: 1.3;
+            white-space: pre-line;
+        }
+
+        .time-display {
+            font-size: clamp(60px, 15vw, 90px);
+            font-weight: bold;
+            color: #06ffa5;
+            margin: 20px 0;
+        }
+
+        .state-label {
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .btn {
+            padding: 15px 10px;
+            font-size: clamp(12px, 2.5vw, 16px);
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-control {
+            background: #0f3460;
+            color: #ffffff;
+        }
+
+        .btn-pause {
+            background: #ff9f1c;
+            color: #1a1a2e;
+        }
+
+        .btn-pause:disabled {
+            background: #333;
+            color: #666;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin: 15px 0;
+        }
+
+        .btn-action {
+            flex: 1;
+            min-width: 140px;
+            padding: 15px;
+            font-size: 16px;
+        }
+
+        .btn-start {
+            background: #06ffa5;
+            color: #1a1a2e;
+        }
+
+        .btn-start:disabled {
+            background: #0f3460;
+            color: #666;
+        }
+
+        .btn-menu {
+            background: #0f3460;
+            color: #ffffff;
+        }
+
+        .btn-voice {
+            background: #e94560;
+            color: #ffffff;
+        }
+
+        .btn-voice.off {
+            background: #0f3460;
+        }
+
+        .next-card {
+            text-align: center;
+            padding: 15px;
+        }
+
+        .next-label {
+            font-size: 12px;
+            color: #a0a0a0;
+            margin-bottom: 10px;
+        }
+
+        .next-text {
+            font-size: 15px;
+            color: #ffffff;
+        }
+
+        /* Couleurs spéciales */
+        .repos {
+            color: #4fc3f7 !important;
+        }
+
+        .success {
+            color: #06ffa5 !important;
+        }
+
+        .warning {
+            color: #ff9f1c !important;
+        }
+
+        .danger {
+            color: #e94560 !important;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .controls {
+                gap: 5px;
+            }
+            
+            .btn {
+                padding: 12px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Écran de sélection -->
+        <div id="selection-screen">
+            <h1>CHRONOMÈTRE D'ENTRAÎNEMENT<br>RESI</h1>
+            <h2>Choisissez votre programme :</h2>
+            <button class="btn-large btn-echauffement" onclick="app.lancerEchauffement()">
+                🔥 ÉCHAUFFEMENT
+            </button>
+            <button class="btn-large btn-entrainement" id="btn-entrainement" onclick="app.lancerEntrainement()" disabled>
+                💪 ENTRAÎNEMENT
+            </button>
+            <p class="warning-text">⚠️ L'échauffement doit être fait en premier</p>
+        </div>
+
+        <!-- Écran d'entraînement -->
+        <div id="training-screen">
+            <div class="card header-card">
+                <div class="mode-label" id="mode-label">🔥 ÉCHAUFFEMENT</div>
+                <div class="progress-label" id="progress-label">ÉTAPE 1 / 24</div>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+
+            <div class="card phase-card">
+                <div class="phase-text" id="phase-text">Préparation</div>
+                <div class="time-display" id="time-display">10s</div>
+                <div class="state-label" id="state-label"></div>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-control" onclick="app.precedent()">⏮ Préc.</button>
+                <button class="btn btn-pause" id="btn-pause" onclick="app.pause()" disabled>⏸ Pause</button>
+                <button class="btn btn-control" onclick="app.suivant()">⏭ Suiv.</button>
+            </div>
+
+            <div class="actions">
+                <button class="btn btn-action btn-start" id="btn-start" onclick="app.demarrer()">▶ DÉMARRER</button>
+                <button class="btn btn-action btn-menu" onclick="app.retourMenu()">🏠 MENU</button>
+                <button class="btn btn-action btn-voice" id="btn-voice" onclick="app.toggleVoice()">🔊 VOIX ON</button>
+            </div>
+
+            <div class="card next-card">
+                <div class="next-label">À VENIR</div>
+                <div class="next-text" id="next-text">Gainage 1/3 (30s)</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const echauffement = [
+            ["Préparation", 10],
+            ["Gainage 1/3", 30],
+            ["Repos", 30],
+            ["Gainage 2/3", 30],
+            ["Repos", 30],
+            ["Gainage 3/3", 30],
+            ["Repos", 30],
+            ["Pompes x10 1/3", 60],
+            ["Pompes x10 2/3", 60],
+            ["Pompes x10 3/3", 60],
+            ["Échauffement doigts", 60],
+            ["Suspension 1/3", 20],
+            ["Repos", 40],
+            ["Suspension 2/3", 20],
+            ["Repos", 40],
+            ["Suspension 3/3", 20],
+            ["Repos", 40],
+            ["Remontées de genoux x10 1/3", 60],
+            ["Remontées de genoux x10 2/3", 60],
+            ["Remontées de genoux x10 3/3", 60],
+            ["Tractions x2 1/3", 60],
+            ["Tractions x2 2/3", 60],
+            ["Tractions x2 3/3", 60],
+            ["Fin de l'échauffement", 120]
+        ];
+
+        const entrainement = [
+            ["Tractions X4\nRepos temps restant", 60],
+            ["Blocage 20'' à 90°\nBlocage 10'' à 45°", 60],
+            ["1 traction\nBlocage 15'' à 120°\n1 traction", 60],
+            ["Suspension 20''\n1 traction", 60],
+            ["2 tractions\nBlocage 20'' à 90°\n2 tractions", 60],
+            ["3 tractions\nRepos temps restant", 60],
+            ["Blocage 10'' à 45°\nBlocage 10'' à 90°\nBlocage 10'' à 120°", 60],
+            ["3 tractions avec blocage\n5'' à 90° et 5'' à 45°", 60],
+            ["2 tractions rapides\nSuspension 10''\n1 traction lente", 60],
+            ["1 Traction\nBlocage 10'' à 120°\n1 traction", 60],
+            ["Blocage 20'' à 90°\nBlocage 10'' à 45°", 60],
+            ["Tractions Max (en nb)\nsuivi de Suspension Max (en '')", 60]
+        ];
+
+        // Application
+        const app = {
+            index: 0,
+            running: false,
+            paused: false,
+            remaining: 0,
+            totalDuration: 0,
+            mode: null,
+            etapes: [],
+            echauffementFait: false,
+            voiceEnabled: true,
+            intervalId: null,
+            audioContext: null,
+
+            // Initialisation du contexte audio
+            initAudio() {
+                if (!this.audioContext) {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            },
+
+            // Bip sonore
+            bip(freq = 800, duration = 400) {
+                try {
+                    this.initAudio();
+                    const oscillator = this.audioContext.createOscillator();
+                    const gainNode = this.audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(this.audioContext.destination);
+                    
+                    oscillator.frequency.value = freq;
+                    oscillator.type = 'sine';
+                    
+                    gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration / 1000);
+                    
+                    oscillator.start(this.audioContext.currentTime);
+                    oscillator.stop(this.audioContext.currentTime + duration / 1000);
+                } catch (e) {
+                    console.log('Bip non disponible');
+                }
+            },
+
+            // Synthèse vocale
+            parler(texte) {
+                if (!this.voiceEnabled || !('speechSynthesis' in window)) return;
+                
+                window.speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(texte);
+                utterance.lang = 'fr-FR';
+                utterance.rate = 0.9;
+                utterance.pitch = 1;
+                utterance.volume = 1;
+                
+                window.speechSynthesis.speak(utterance);
+            },
+
+            toggleVoice() {
+                this.voiceEnabled = !this.voiceEnabled;
+                const btn = document.getElementById('btn-voice');
+                if (this.voiceEnabled) {
+                    btn.textContent = '🔊 VOIX ON';
+                    btn.classList.remove('off');
+                } else {
+                    btn.textContent = '🔇 VOIX OFF';
+                    btn.classList.add('off');
+                }
+            },
+
+            lancerEchauffement() {
+                this.mode = 'echauffement';
+                this.etapes = echauffement;
+                this.index = 0;
+                document.getElementById('selection-screen').style.display = 'none';
+                document.getElementById('training-screen').style.display = 'block';
+                document.getElementById('mode-label').textContent = '🔥 ÉCHAUFFEMENT';
+                document.getElementById('mode-label').className = 'mode-label success';
+                this.afficherEtape();
+                this.demarrer();
+            },
+
+            lancerEntrainement() {
+                this.mode = 'entrainement';
+                this.etapes = entrainement;
+                this.index = 0;
+                document.getElementById('selection-screen').style.display = 'none';
+                document.getElementById('training-screen').style.display = 'block';
+                document.getElementById('mode-label').textContent = '💪 ENTRAÎNEMENT';
+                document.getElementById('mode-label').className = 'mode-label danger';
+                this.afficherEtape();
+                this.demarrer();
+            },
+
+            retourMenu() {
+                this.arreter();
+                document.getElementById('training-screen').style.display = 'none';
+                document.getElementById('selection-screen').style.display = 'block';
+                
+                if (this.echauffementFait) {
+                    document.getElementById('btn-entrainement').disabled = false;
+                }
+            },
+
+            afficherEtape() {
+                const [phase, duree] = this.etapes[this.index];
+                this.remaining = duree;
+                this.totalDuration = duree;
+
+                document.getElementById('progress-label').textContent = 
+                    `ÉTAPE ${this.index + 1} / ${this.etapes.length}`;
+                document.getElementById('phase-text').textContent = phase;
+                document.getElementById('time-display').textContent = `${duree}s`;
+                
+                // Couleurs
+                const phaseEl = document.getElementById('phase-text');
+                const timeEl = document.getElementById('time-display');
+                
+                if (phase.includes('Repos')) {
+                    phaseEl.className = 'phase-text repos';
+                    timeEl.className = 'time-display repos';
+                } else if (phase.toLowerCase().includes('fin') || phase.includes('Terminé')) {
+                    phaseEl.className = 'phase-text success';
+                    timeEl.className = 'time-display success';
+                } else {
+                    phaseEl.className = 'phase-text';
+                    timeEl.className = 'time-display success';
+                }
+
+                // Prochain exercice
+                if (this.index < this.etapes.length - 1) {
+                    const [nextPhase, nextDuree] = this.etapes[this.index + 1];
+                    document.getElementById('next-text').textContent = 
+                        `${nextPhase} (${nextDuree}s)`;
+                } else {
+                    document.getElementById('next-text').textContent = 'Dernier exercice ! 🎯';
+                }
+
+                // Barre de progression
+                document.getElementById('progress-fill').style.width = '0%';
+
+                // Annonce vocale
+                setTimeout(() => this.parler(phase), 100);
+            },
+
+            demarrer() {
+                if (this.running) return;
+                
+                // Initialiser le contexte audio au premier clic
+                this.initAudio();
+                
+                this.running = true;
+                this.paused = false;
+                
+                document.getElementById('btn-start').disabled = true;
+                document.getElementById('btn-pause').disabled = false;
+                document.getElementById('state-label').textContent = '⏱ EN COURS';
+                document.getElementById('state-label').className = 'state-label success';
+                
+                this.decompte();
+            },
+
+            decompte() {
+                if (this.intervalId) clearInterval(this.intervalId);
+                
+                this.intervalId = setInterval(() => {
+                    if (!this.paused && this.running) {
+                        document.getElementById('time-display').textContent = `${this.remaining}s`;
+                        
+                        // Barre de progression
+                        const progress = ((this.totalDuration - this.remaining) / this.totalDuration) * 100;
+                        document.getElementById('progress-fill').style.width = `${progress}%`;
+                        
+                        // Bips
+                        if (this.remaining % 10 === 0 && this.remaining > 3) {
+                            this.bip(400, 150);
+                        }
+                        
+                        if (this.remaining <= 3 && this.remaining > 0) {
+                            this.bip(600, 200);
+                            document.getElementById('time-display').className = 'time-display danger';
+                        }
+                        
+                        this.remaining--;
+                        
+                        if (this.remaining < 0) {
+                            this.bip(800, 400);
+                            this.suivant();
+                        }
+                    }
+                }, 1000);
+            },
+
+            suivant() {
+                this.arreter();
+                
+                if (this.index < this.etapes.length - 1) {
+                    this.index++;
+                    this.afficherEtape();
+                    setTimeout(() => this.demarrer(), 800);
+                } else {
+                    // Fin du programme
+                    if (this.mode === 'echauffement') {
+                        this.echauffementFait = true;
+                        document.getElementById('btn-entrainement').disabled = false;
+                        document.getElementById('phase-text').textContent = '🏁 ÉCHAUFFEMENT TERMINÉ !';
+                        this.parler('Échauffement terminé ! Vous pouvez maintenant commencer l\'entraînement.');
+                    } else {
+                        document.getElementById('phase-text').textContent = '🏁 ENTRAÎNEMENT TERMINÉ !';
+                        this.parler('Entraînement terminé ! Bravo !');
+                    }
+                    
+                    document.getElementById('phase-text').className = 'phase-text success';
+                    document.getElementById('time-display').textContent = '';
+                    document.getElementById('state-label').textContent = '';
+                    document.getElementById('progress-label').textContent = 'PROGRAMME TERMINÉ';
+                    document.getElementById('next-text').textContent = 'Félicitations ! 🎉';
+                    document.getElementById('progress-fill').style.width = '100%';
+                }
+            },
+
+            precedent() {
+                if (this.index > 0) {
+                    this.arreter();
+                    this.index--;
+                    this.afficherEtape();
+                    document.getElementById('btn-start').disabled = false;
+                    document.getElementById('state-label').textContent = '';
+                }
+            },
+
+            pause() {
+                this.paused = !this.paused;
+                const btnPause = document.getElementById('btn-pause');
+                const stateLabel = document.getElementById('state-label');
+                
+                if (this.paused) {
+                    btnPause.textContent = '▶ REPRENDRE';
+                    btnPause.style.background = '#06ffa5';
+                    stateLabel.textContent = '⏸ EN PAUSE';
+                    stateLabel.className = 'state-label warning';
+                } else {
+                    btnPause.textContent = '⏸ PAUSE';
+                    btnPause.style.background = '#ff9f1c';
+                    stateLabel.textContent = '⏱ EN COURS';
+                    stateLabel.className = 'state-label success';
+                }
+            },
+
+            arreter() {
+                this.running = false;
+                this.paused = false;
+                if (this.intervalId) {
+                    clearInterval(this.intervalId);
+                    this.intervalId = null;
+                }
+            }
+        };
+
+        // Empêcher le verrouillage de l'écran
+        let wakeLock = null;
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                }
+            } catch (err) {
+                console.log('Wake Lock non disponible');
+            }
+        }
+        requestWakeLock();
+    </script>
+</body>
+</html>
