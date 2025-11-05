@@ -76,12 +76,6 @@
             color: #ffffff;
         }
 
-        .btn-entrainement:disabled {
-            background: #0f3460;
-            color: #666;
-            cursor: not-allowed;
-        }
-
         .warning-text {
             color: #a0a0a0;
             font-size: 14px;
@@ -291,10 +285,10 @@
             <button class="btn-large btn-echauffement" onclick="app.lancerEchauffement()">
                 🔥 ÉCHAUFFEMENT
             </button>
-            <button class="btn-large btn-entrainement" id="btn-entrainement" onclick="app.lancerEntrainement()" disabled>
+            <button class="btn-large btn-entrainement" id="btn-entrainement" onclick="app.lancerEntrainement()">
                 💪 ENTRAÎNEMENT
             </button>
-            <p class="warning-text">⚠️ L'échauffement doit être fait en premier</p>
+            <p class="warning-text">⚠️ L'échauffement est recommandé avant l'entraînement</p>
         </div>
 
         <!-- Écran d'entraînement -->
@@ -386,7 +380,6 @@
             totalDuration: 0,
             mode: null,
             etapes: [],
-            echauffementFait: false,
             voiceEnabled: true,
             intervalId: null,
             audioContext: null,
@@ -476,10 +469,6 @@
                 this.arreter();
                 document.getElementById('training-screen').style.display = 'none';
                 document.getElementById('selection-screen').style.display = 'block';
-                
-                if (this.echauffementFait) {
-                    document.getElementById('btn-entrainement').disabled = false;
-                }
             },
 
             afficherEtape() {
@@ -581,10 +570,8 @@
                 } else {
                     // Fin du programme
                     if (this.mode === 'echauffement') {
-                        this.echauffementFait = true;
-                        document.getElementById('btn-entrainement').disabled = false;
                         document.getElementById('phase-text').textContent = '🏁 ÉCHAUFFEMENT TERMINÉ !';
-                        this.parler('Échauffement terminé ! Vous pouvez maintenant commencer l\'entraînement.');
+                        this.parler('Échauffement terminé !');
                     } else {
                         document.getElementById('phase-text').textContent = '🏁 ENTRAÎNEMENT TERMINÉ !';
                         this.parler('Entraînement terminé ! Bravo !');
